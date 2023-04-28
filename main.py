@@ -22,7 +22,7 @@ class empleados(BaseModel):
 conect = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root",
+    password="",
     database="Parcial3P1_CA100522"
 )
 
@@ -51,7 +51,7 @@ async def getEmpleados():
     response = list(map(lambda data: {
     "id": data[0],
     "nombre": data[1],
-    "salario": data[2],
+    "salario": str(data[2]),
     "categoria": data[3],
     "genero": data[4],
     "telefono": data[5],
@@ -73,7 +73,7 @@ async def getEmpleado(id: int):
         response = {
         "id": result[0],
         "nombre": result[1],
-        "salario": result[2],
+        "salario": str(result[2]),
         "categoria": result[3],
         "genero": result[4],
         "telefono": result[5],
@@ -87,8 +87,9 @@ async def putEmpleado(id: int, body :empleados):
     cursor = conect.cursor()
     response = { **body.dict() }
     response.update({"id":id})
+    today = date.today()
     sql = "UPDATE empleados SET nombre = %s, salario = %s, categoria = %s, genero = %s, telefono = %s, fecha = %s  WHERE id = %s"
-    values = (body.nombre,body.apellido,body.carnet,id)
+    values = (body.nombre,body.salario,body.categoria,body.genero,body.telefono,today,id)
     cursor.execute(sql,values)
     conect.commit()
     cursor.close()
@@ -106,6 +107,7 @@ async def postEmpleado(body:empleados):
     cursor.close()
     return JSONResponse(content={"mensaje": f"El empleado se ha registrado con éxito"})
 
+# Endpoint para eliminar un empleado
 @app.delete("/empleado/{id}")
 async def deteleEmpleado(id : int):  
     cursor = conect.cursor()
